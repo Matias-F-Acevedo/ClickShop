@@ -35,8 +35,17 @@ export class UsersService {
 
 
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<UserInterface[]> {
+    const users = await  this.userRepository.find();
+    let result:UserInterface[] = [];
+
+    if(users.length) {
+      result =  users.map((u)=> {
+        delete (u).user_password;
+        return u;
+      });
+    }
+    return result;
   }
 
   findOne(id: number) {

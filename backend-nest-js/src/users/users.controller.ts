@@ -20,7 +20,7 @@ export class UsersController {
 
 
   @Get()
-  findAll() {
+  findAll(): Promise<UserInterface[]> {
     return this.usersService.findAll();
   }
 

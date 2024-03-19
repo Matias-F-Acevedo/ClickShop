@@ -48,9 +48,20 @@ export class UsersService {
     return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number): Promise<HttpException |UserInterface> {
+
+    const user = await this.userRepository.findOne({where: {user_id:id}});
+    if(!user){
+      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+    };
+
+    const userWithoutPassword = {...user};
+      delete (userWithoutPassword).user_password;
+   
+      return userWithoutPassword;
   }
+
+  
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;

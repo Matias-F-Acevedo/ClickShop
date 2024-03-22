@@ -1,16 +1,26 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/category/entities/category.entity';
+import { Entity, PrimaryGeneratedColumn, Column, TableInheritance, ManyToOne, OneToMany, JoinTable, OneToOne } from 'typeorm';
 
-@Entity({ name: 'products' })
+@Entity({ name: 'products' }) // Nombre de la tabla en la base de datos
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, length: 12 })
+  @Column()
   name: string;
+
+  @Column({nullable:true})
+  quantity:number;
 
   @Column()
   price: number;
 
   @Column()
   description: string;
+
+  @ManyToOne(() => Category, (category) => category.product)
+  category: Category
+
 }
+
+

@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
 
+
+import { CategoryModule } from './category/category.module';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -14,12 +17,14 @@ import { ProductModule } from './product/product.module';
       password:"root",
       port:3306,
       database:"db_clickshop",
+      migrations: ["./path-to-migrations-dir"],
       entities:[__dirname + "/**/*.entity{.ts,.js}"],
       synchronize:true,
     }),
-    UserModule, ProductModule
+    UserModule, ProductModule, CategoryModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

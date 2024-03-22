@@ -3,9 +3,6 @@ import { Expose } from 'class-transformer';
 
 export class CreateProductDto {
    
-    @Expose()
-    @IsNumber()
-    id_prod: number;
 
    @Expose()
    @IsNotEmpty()

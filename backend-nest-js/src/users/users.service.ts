@@ -61,13 +61,34 @@ export class UsersService {
       return userWithoutPassword;
   }
 
+
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<HttpException | UserInterface> {
+    
+    const user = await this.userRepository.findOne({where:{user_id:id}});
+    if(!user){
+      return new HttpException('User does not exist', HttpStatus.CONFLICT);
+    }
+    await this.userRepository.update(id, updateUserDto);
+
+    return this.findOne(id);
+
+  }
+
+
+  async remove(id: number):Promise<HttpException | UserInterface>{
+    const user = await this.userRepository.findOne({where:{user_id:id}});
+
+    if (!user) {
+      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+    }
+    this.userRepository.delete({ user_id: id });
   
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    const userWithoutPassword = {...user};
+    delete (userWithoutPassword).user_password;
+ 
+    return userWithoutPassword;
+  
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
 }

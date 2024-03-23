@@ -5,29 +5,30 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserInterface } from './interface/user.interface';
+import * as bcrypt from 'bcrypt';
 
 
 @Injectable()
 export class UsersService {
 
-  constructor(@InjectRepository(User) private userRepository: Repository<User>){}
+  constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
 
 
-  async create(createUserDto: CreateUserDto): Promise<HttpException |UserInterface>{
+  async create(createUserDto: CreateUserDto): Promise<HttpException | UserInterface> {
     try {
-      const userFound = await this.userRepository.findOne({where: {user_email: createUserDto.user_email}});
+      const userFound = await this.userRepository.findOne({ where: { user_email: createUserDto.user_email } });
 
-      if(userFound) throw new Error("This email is registered");
+      if (userFound) throw new Error("This email is registered");
 
-      const newUser =  this.userRepository.create(createUserDto);
+      const newUser = this.userRepository.create({ ...createUserDto, user_password: bcrypt.hashSync(createUserDto.user_password, 8) });
       const newUserSave = await this.userRepository.save(newUser)
 
-      const userWithoutPassword = {...newUserSave};
+      const userWithoutPassword = { ...newUserSave };
       delete (userWithoutPassword).user_password;
 
       return userWithoutPassword;
 
-    
+
     } catch (error) {
       return new HttpException('User already exists', HttpStatus.CONFLICT);
     }
@@ -36,11 +37,11 @@ export class UsersService {
 
 
   async findAll(): Promise<UserInterface[]> {
-    const users = await  this.userRepository.find();
-    let result:UserInterface[] = [];
+    const users = await this.userRepository.find();
+    let result: UserInterface[] = [];
 
-    if(users.length) {
-      result =  users.map((u)=> {
+    if (users.length) {
+      result = users.map((u) => {
         delete (u).user_password;
         return u;
       });
@@ -48,47 +49,69 @@ export class UsersService {
     return result;
   }
 
-  async findOne(id: number): Promise<HttpException |UserInterface> {
+  async findOne(id: number): Promise<HttpException | UserInterface> {
 
-    const user = await this.userRepository.findOne({where: {user_id:id}});
-    if(!user){
+    const user = await this.userRepository.findOne({ where: { user_id: id } });
+    if (!user) {
       return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
     };
 
-    const userWithoutPassword = {...user};
-      delete (userWithoutPassword).user_password;
-   
-      return userWithoutPassword;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword).user_password;
+
+    return userWithoutPassword;
   }
 
 
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<HttpException | UserInterface> {
-    
-    const user = await this.userRepository.findOne({where:{user_id:id}});
-    if(!user){
+
+    const user = await this.userRepository.findOne({ where: { user_id: id } });
+    if (!user) {
       return new HttpException('User does not exist', HttpStatus.CONFLICT);
     }
-    await this.userRepository.update(id, updateUserDto);
+    // en las siguentes lines comprueba que al querer actualizar el email, no use uno de otro usuario o el que ya tenia antes.
+    if (updateUserDto.user_email) {
+      const user = await this.userRepository.findOne({ where: { user_email: updateUserDto.user_email } });
+
+      if (user) return new HttpException('Email not available', HttpStatus.CONFLICT);
+
+    }
+
+    let userUpdate = updateUserDto;
+
+    if (userUpdate.user_password) {
+      userUpdate.user_password = bcrypt.hashSync(updateUserDto.user_password, 8)
+    }
+
+    await this.userRepository.update(id, userUpdate);
 
     return this.findOne(id);
 
   }
 
 
-  async remove(id: number):Promise<HttpException | UserInterface>{
-    const user = await this.userRepository.findOne({where:{user_id:id}});
+  async remove(id: number): Promise<HttpException | UserInterface> {
+    const user = await this.userRepository.findOne({ where: { user_id: id } });
 
     if (!user) {
       return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
     }
     this.userRepository.delete({ user_id: id });
-  
-    const userWithoutPassword = {...user};
+
+    const userWithoutPassword = { ...user };
     delete (userWithoutPassword).user_password;
- 
+
     return userWithoutPassword;
-  
+
+  }
+
+  async findUserByEmail(email: string):Promise<HttpException | User> {
+    const user = await this.userRepository.findOne({ where: { user_email: email } });
+    if (!user) {
+      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
 }

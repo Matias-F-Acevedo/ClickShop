@@ -8,16 +8,12 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
-  @Post()
-  createCategory(@Body() newCategory: CreateCategoryDto) {
-    return this.categoryService.createCategory(newCategory);
-  }
-
+  
   @Get()
   getCategories(): Promise<Category[]> {
     return this.categoryService.getCategories();
   }
-
+  
   @Get(':id')
   async getById(@Param('id', ParseIntPipe) id: number) {
     const category = await this.categoryService.getCategoryById(id);
@@ -25,6 +21,11 @@ export class CategoryController {
       throw new NotFoundException('Category not found');
     }
     return category;
+  }
+  
+  @Post()
+  createCategory(@Body() newCategory: CreateCategoryDto) {
+    return this.categoryService.createCategory(newCategory);
   }
 
   @Put(':id')

@@ -1,5 +1,6 @@
+import { Cart } from 'src/cart/entities/cart.entity';
 import { Category } from 'src/category/entities/category.entity';
-import { Entity, PrimaryGeneratedColumn, Column, TableInheritance, ManyToOne, OneToMany, JoinTable, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany } from 'typeorm';
 
 @Entity({ name: 'products' }) // Nombre de la tabla en la base de datos
 export class Product {
@@ -9,8 +10,8 @@ export class Product {
   @Column()
   name: string;
 
-  @Column({nullable:true})
-  quantity:number;
+  @Column({ nullable: true })
+  quantity: number;
 
   @Column()
   price: number;
@@ -18,9 +19,11 @@ export class Product {
   @Column()
   description: string;
 
-  @ManyToOne(() => Category, (category) => category.product)
-  category: Category
+  @ManyToOne(() => Category, category => category.product)
+  category: Category;
 
+  @ManyToMany(() => Cart, cart => cart.products)
+  carts: Cart[];
 }
 
 

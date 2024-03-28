@@ -7,6 +7,7 @@ import { ProductModule } from './product/product.module';
 
 
 import { CategoryModule } from './category/category.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { CategoryModule } from './category/category.module';
       entities:[__dirname + "/**/*.entity{.ts,.js}"],
       synchronize:true,
     }),
-    UserModule, ProductModule, CategoryModule
+    UserModule, ProductModule, CategoryModule, CartModule
   ],
   controllers: [AppController],
   providers: [AppService],

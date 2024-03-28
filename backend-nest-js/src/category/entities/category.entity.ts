@@ -13,7 +13,7 @@ export class Category {
   description: string;
 
   @OneToMany(() => Product, (product) => product.category)
-    product: Product
+    product: Product[]
 
 
 }

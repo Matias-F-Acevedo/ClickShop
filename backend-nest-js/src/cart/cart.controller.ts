@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
+import { Cart } from './entities/cart.entity'; 
 import { UpdateCartDto } from './dto/update-cart.dto';
-
-@Controller('cart')
-export class CartController {
-  constructor(private readonly cartService: CartService) {}
-
+import { Product } from 'src/product/product.entity';
+@Controller('carts') 
+export class CartController { 
+  constructor(private cartService: CartService) {}
   @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
+  createCart(@Body("userId") userId: number): Promise<Cart>  {
+    return this.cartService.createCart(userId); 
   }
 
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  getCarts(): Promise<Cart[]> { 
+    return this.cartService.getCarts(); 
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    const cart = await this.cartService.getCartById(id); 
+    if (!cart) {
+      throw new NotFoundException('Cart not found'); 
+    }
+    return cart; 
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  @Put(':userId/update')
+  async update(@Param('userId', ParseIntPipe) userId: number, @Body() updateCartDto: UpdateCartDto) {
+    try {
+      const updatedCart = await this.cartService.updateCart(userId, updateCartDto.newProductId);
+      return updatedCart;
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    const deletedCart = await this.cartService.deleteCart(id); 
+    if (!deletedCart) {
+      throw new NotFoundException('Cart not found'); 
+    }
+    return deletedCart; 
   }
 }

@@ -1,4 +1,5 @@
 import { IsString, IsNumber, Min, IsOptional, MaxLength } from 'class-validator';
+import { Category } from 'src/category/entities/category.entity';
 
 export class UpdateProductDto {
 
@@ -20,5 +21,8 @@ export class UpdateProductDto {
   @IsOptional() // El campo es opcional
   @IsString()
   description?: string;
+
+  @IsOptional()
+  category?: number;
 
 }

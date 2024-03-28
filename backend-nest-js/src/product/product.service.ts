@@ -12,12 +12,6 @@ export class ProductService {
   ) { }
 
   async createProduct(productDto: CreateProductDto) {
-    // Validar si el nombre del producto ya existe
-    const existingProduct = await this.productRepository.findOne({ where: { name: productDto.name } });
-    if (existingProduct) {
-      throw new HttpException('Product with this name already exists', HttpStatus.CONFLICT);
-    }
-
     const newProduct = this.productRepository.create(productDto);
     return this.productRepository.save(newProduct);
   }
